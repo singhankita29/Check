@@ -19,14 +19,14 @@ app.get("/", (req, res) => {
 app.use("/user", userController)
 
 
-app.listen(process.env.URL, async () => {
+app.listen(8001, async () => {
     try{
         await connection
-        console.log("DB connected")
+        console.log("connected to DB successfully")
     }
     catch(err){
         console.log(err)
         console.log("error occur")
     }
-    console.log(`Listning on port ${process.env.URL}`)
+    console.log(`Listning on port 8001`)
 })
