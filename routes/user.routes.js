@@ -1,50 +1,63 @@
-const { Router } = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const express = require("express")
+const bcrypt = require("bcrypt")
+const UserModel  = require("../models/User.model")
+const jwt = require("jsonwebtoken")
+const userController = express.Router();
 
-const {UserModel} = require("./models/User.Model")
 
-const cors = require("cors");
+userController.post("/signup",  (req, res) => {
 
-const userController = Router();
+    const {email, password} = req.body;
+    
+    bcrypt.hash(password,10, async function(err, hash){
 
-userController.use(cors());
+        if(err){
+            res.send("internal error")
+        }
 
-userController.get("/",async(req,res) => {
-    const result=await UserModel.find()
-    res.send(result)
-})
 
-userController.post("/signup", async (req, res) => {
-    let {email,password,age}=req.body;
-    bcrypt.hash(password,6).then(async function(hash){
-        const user = new UserModel({email,password:hash,age})
-        await user.save()
-        res.send("Sign up successfull")
+        const user = new UserModel({
+            email,
+            password: hash
+        })
+
+        try {
+            const result = await user.save();
+            console.log(result)
+            res.send("signup sucessfull")
+        } catch (error) {
+            console.log(error)
+            res.send("Internal error")
+        }
     })
-    .catch(() =>{
-      res.send("something went wrong")
-    })
+    
 })
 
 userController.post("/login", async (req, res) => {
-    let {email,password}=req.body;
-    let user=await UserModel.findOne({email})
-    let hash=user.password
-    bcrypt.compare(password,hash, function(err,result){
-      if(result){
-        var token = jwt.sign({email:email}, 'secret');
-        console.log(token)
-        res.send({"msg":"Login successfull", "token" : token})
-      }
-      else{
-        res.send("Login failed, invalid credentials")
+
+    const {email, password} = req.body;
+    const user = await UserModel.findOne({email})
+    const {_id}=user
+    
+    if(!user){
+        return res.send("your account is not registered with us")
+    }
+    const hash = user.password;
+    const userId = user._id
+
+    bcrypt.compare(password, hash, function(err, result){
+
+       if(result){
+        var token = jwt.sign({email, userId}, "secret")
+        return res.send({"message": "Login sucess", "token": token,"id":_id})
+       }
+       else{
+        return res.send("Wrong Input")
        }
     })
-
+   
 })
 
 
-module.exports = 
-    userController;
+
+module.exports = userController
