@@ -69,7 +69,7 @@ app.delete("dashboard/:cardId", authentication, authorisation(["admin"]), async 
     res.send("deleted"+" "+req.params.cardId)
 })
 
-app.listen(8080, async () => {
+app.listen(8000, async () => {
     try{
         await connection
         console.log("connected to db successfully")
@@ -78,5 +78,5 @@ app.listen(8080, async () => {
         console.log("err connecting to db")
         console.log(err)
     }
-    console.log("listening on PORT 8080")
+    console.log("listening on PORT 8000")
 })
